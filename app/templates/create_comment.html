@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="centre">
+    <div class="create-form">
+        <form action="{{url_for('create_comment', post_id=post.post_id)}}" method="post">
+            {{ form.hidden_tag() }}
+
+            {{form.c_content(placeholder="Comment here")}}
+            {{form.submit()}}
+        </form>
+    </div>
+</div>
+
+{% endblock %}

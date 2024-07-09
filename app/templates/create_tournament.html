@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="centre">
+    <div class="create-form">
+        <form action="{{url_for('create_tournament')}}" method="post">
+            {{form.hidden_tag()}}
+
+            {{form.tournament_name.label}}
+            {{form.tournament_name}}
+
+            {{form.tournament_description.label}}
+            {{form.tournament_description}}
+
+            {{form.participants(placeholder="Max participants", max=20)}}
+
+            {{form.start_date.label}}
+            {{form.start_date}}
+
+            {{form.end_date.label}}
+            {{form.end_date}}
+
+            {{form.submit}}
+        </form>
+    </div>
+</div>
+
+{% endblock %}

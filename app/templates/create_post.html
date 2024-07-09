@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="centre">
+    <div class="create-form">
+        <h1>Create a Post</h1>
+        <form action="{{url_for('create_post')}}" method="post">
+            {{form.hidden_tag()}}
+
+            {{form.post_content(placeholder="What's on your mind?")}}
+
+            {{form.category.label}}
+            {{form.category}}
+
+            {{form.submit}}
+        </form>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="centre">
+    <div class="gen-container">
+        <h1>{{tournament.tournament_name}}</h1>
+        <p>{{tournament.tournament_description}}</p>
+        {% if admin %}
+        <a href="{{url_for('add_match', tournament_id=tournament.tournament_id)}}"><i
+                class="fa-solid fa-plus"></i>  Add Match</a>
+        {% endif %}
+        <p><i class="fa-solid fa-calendar-days"></i>  {{tournament.start_date|format_date}} - {{tournament.end_date|format_date}}</p>
+
+        <p><i class="fa-solid fa-user-group"></i>  {{users|length}} / {{tournament.participants}}</p>
+
+        {% if full %}
+        <p>Tournament is full!</p>
+        {% else %}
+            {% if in_tournament %}
+            <a href="{{url_for('join_tournament', tournament_id=tournament.tournament_id)}}"><i
+                    class="fa-solid fa-user-minus"></i>  Leave</a>
+            {% else %}
+            <a href="{{url_for('join_tournament', tournament_id=tournament.tournament_id)}}"><i
+                    class="fa-solid fa-user-plus"></i>  Join</a>
+            {% endif %}
+        {% endif %}
+
+        <h2>Participants</h2>
+        <div class="info-table">
+            <table>
+                <tr>
+                    <th>Username</th>
+                </tr>
+
+                {% for user in users %}
+                <tr>
+                    <td><a href="{{url_for('user', username='user.username')}}"><i
+                            class="fa-solid fa-circle-chevron-right"></i>  {{user.username}}</a></td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <h2>Matches</h2>
+        <div class="info-table">
+            <table>
+                <tr>
+                    <th>Match Number</th>
+                    <th>Date</th>
+                </tr>
+
+                {% for match in matches %}
+                <tr>
+                    <td>Match {{match.match_number}}</td>
+                    <td>{{match.match_datetime|format_datetime}}</td>
+                </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+
+
+    </div>
+</div>
+
+{% endblock %}

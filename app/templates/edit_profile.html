@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="centre">
+    <div class="create-form">
+        <h1>Edit Profile</h1>
+
+        <form action="{{url_for('edit_profile')}}" method="post" enctype="multipart/form-data">
+            {{form.hidden_tag()}}
+
+            {{form.pronouns.label}}
+            {{form.pronouns}}
+            {% for error in form.pronouns.errors %}
+            <p class="error"><i class="fa-solid fa-circle-exclamation"></i>  {{ error }}</p>
+            {% endfor %}
+
+            {{form.bio.label}}
+            {{form.bio}}
+
+
+            {{form.pfp.label}}
+            <input type="file" id="file_input" name="pfp" accept="image/*">
+            {% for error in form.pfp.errors %}
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <p class="error">{{ error }}</p>
+            {% endfor %}
+
+            {{form.submit}}
+            <button onClick="javascript:window.location.href='{{url_for('user', username=current_user.username)}}'">Cancel</button>
+
+
+        </form>
+    </div>
+</div>
+
+{% endblock %}

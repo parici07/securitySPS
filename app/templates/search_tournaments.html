@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<form action="{{url_for('search_tournaments')}}" method="post">
+        {{form.hidden_tag()}}
+
+        <div class="search-bar">
+            {{form.search(placeholder="Search for tournaments")}}
+            {{form.submit}}
+        </div>
+</form>
+
+<div class="centre">
+    <div class="results">
+        {% if tournaments != '' %}
+        {% if tournaments %}
+        <p>{{tournaments|length}} results found for {{form.search.data}}</p>
+
+        <table>
+            <tr>
+                <th>Tournament Name</th>
+            </tr>
+
+            {% for tournament in tournaments %}
+            <tr>
+                <td><a href="{{url_for('tournament', tournament_id=tournament.tournament_id)}}"><i
+                        class="fa-solid fa-circle-chevron-right"></i>  {{tournament.tournament_name}}</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p>No results found.</p>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

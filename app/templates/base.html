@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% if title %}
+    <title>{{title}}</title>
+    {% else %}
+    <title>SPS eSports</title>
+    {% endif %}
+    <link rel="stylesheet" href="{{url_for('static', filename='css/styles.css')}}">
+    <script src="https://kit.fontawesome.com/ea0cb5ba41.js" crossorigin="anonymous"></script>
+
+    <script>
+
+        function showDropdown(){
+           var dropdown = document.getElementById("dropdown")
+              if(dropdown.style.display === "none" || dropdown.style.display === ""){
+                dropdown.style.display = "flex";
+               } else {
+                dropdown.style.display = "none";
+                }
+        }
+
+
+
+        function closeFlash(){
+            var flash = document.getElementsByClassName("flash")[0];
+            flash.style.display = "none";
+        }
+
+        function showNavBar(){
+            if (window.innerWidth < 800){
+                document.getElementById("navbar").style.width = "100%";
+                document.getElementById("navbar").style.paddingLeft = "1em";
+            } else {
+                document.getElementById("navbar").style.width = "50vh";
+                document.getElementById("navbar").style.paddingLeft = "1em";
+            }
+        }
+        function hideNavBar(){
+            document.getElementById("navbar").style.width = "0";
+            document.getElementById("navbar").style.paddingLeft = "0";
+
+        }
+
+        function showFilters(){
+            var filters = document.getElementsByClassName("search-filter-container")[0];
+            if(filters.style.display === "none" || filters.style.display === ""){
+                filters.style.display = "flex";
+            } else {
+                filters.style.display = "none";
+            }
+        }
+
+
+
+    </script>
+</head>
+<body>
+
+<div class="header">
+    <h1 onclick="window.location.href='{{url_for('index')}}'">SPS eSports</h1>
+
+    {% if current_user.is_authenticated %}
+    <a href="{{url_for('search_games')}}">Games</a>
+    <a href="{{url_for('search_teams')}}">Teams</a>
+    <a href="{{url_for('search_posts')}}">Posts</a>
+    <a href="{{url_for('search_tournaments')}}">Tournaments</a>
+    <a href="{{url_for('user', username=current_user.username)}}">{{current_user.username}}</a>
+    <a href="{{url_for('logout')}}">Logout</a>
+    {% else %}
+        <a href="{{url_for('login')}}">Login</a>
+        <a href="{{url_for('register')}}">Register</a>
+    {% endif %}
+
+
+
+</div>
+<hr>
+<!-- flashed messages -->
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="flash">
+               <a href="javascript:closeFlash()">X</a>
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+{% block content %} {% endblock %}
+
+
+</body>
+</html>

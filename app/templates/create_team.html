@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="centre">
+      <div class="create-form">
+        <h1>Create a Team</h1>
+        <form action="{{url_for('create_team')}}" method="post">
+            {{form.hidden_tag()}}
+
+            {{form.team_name.label}}
+            {{form.team_name}}
+
+            {{form.team_description.label}}
+            {{form.team_description}}
+
+            {{form.submit}}
+        </form>
+      </div>
+    </div>
+{% endblock %}

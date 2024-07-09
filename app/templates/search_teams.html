@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="centre">
+  <a href="{{url_for('create_team')}}">Create a Team</a>
+</div>
+
+<form action="{{url_for('search_teams')}}" method="post">
+  {{form.hidden_tag()}}
+
+  <div class="search-bar">
+    {{form.team_name(placeholder='Search for a team')}}
+    {{form.submit}}
+  </div>
+
+</form>
+
+<div class="centre">
+  <div class="results">
+    {% if teams != '' %}
+      {% if teams %}
+        <p>{{teams|length}} results found for {{form.team_name.data}}</p>
+        <table>
+          <tr>
+            <th>Team</th>
+            <th>Status</th>
+          </tr>
+          {% for team in teams %}
+            <tr>
+              <td><a href="{{url_for('team', team_id=team.team_id)}}"><i class="fa-solid fa-circle-chevron-right"></i>  {{team.team_name}}</a></td>
+              <td>{% if team.official %}Official{% else %}Unofficial{% endif %}</td>
+            </tr>
+          {% endfor %}
+
+        </table>
+
+      {% else %}
+        <p>No results found</p>
+      {% endif %}
+    {% endif %}
+
+  </div>
+</div>
+
+
+{% endblock %}

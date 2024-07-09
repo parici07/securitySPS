@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="centre">
+    <div class="gen-container">
+        <h1>{{team.team_name}}</h1>
+        <p>{{team.team_description}}</p>
+
+        {% if team.official %}
+            <p>Official Team</p>
+        {% else %}
+            <p>Unofficial Team</p>
+        {% endif %}
+
+        {% if in_team %}
+            <a href="{{url_for('join_team', team_id=team.team_id)}}">Leave Team</a>
+        {% else %}
+            <a href="{{url_for('join_team', team_id=team.team_id)}}">Join Team</a>
+        {% endif %}
+
+        <table>
+            <tr>
+                <th>Members</th>
+            </tr>
+
+            {% for user in users %}
+                <tr>
+                    <td>{{user.username}}</td>
+                </tr>
+            {% endfor %}
+
+        </table>
+    </div>
+</div>
+
+{% endblock %}

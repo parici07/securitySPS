@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="centre">
+    <div class="create-form">
+        <form action="{{url_for('add_match', tournament_id=tournament_id)}}" method="post">
+            {{form.hidden_tag()}}
+
+            <label for="player1">Player 1</label>
+            <select name="player1" id="player1" required>
+                {% for choice in choices %}
+                <option value="{{choice[0]}}">{{choice[1]}}</option>
+                {% endfor %}
+            </select>
+
+            <label for="player2">Player 2</label>
+            <select name="player2" id="player2" required>
+                {% for choice in choices %}
+                <option value="{{choice[0]}}">{{choice[1]}}</option>
+                {% endfor %}
+            </select>
+
+            {{form.match_date.label}}
+            {{form.match_date}}
+            {{form.match_date.errors}}
+
+            {{form.match_time.label}}
+            {{form.match_time}}
+            {{form.match_time.errors}}
+
+            <input type="submit" value="Add Match">
+        </form>
+    </div>
+</div>
+
+{% endblock %}

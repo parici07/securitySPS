@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="centre">
+        <div class="create-form">
+            <h1>Registration</h1>
+            <form action="/register" method="post">
+                {{ form.hidden_tag() }}
+
+                {{ form.username.label }}
+                {{ form.username }}
+
+                {{ form.email.label }}
+                {{ form.email }}
+                {% for error in form.email.errors %}
+                    <p class="error">{{ error }}</p>
+                {% endfor %}
+
+                {{ form.password.label }}
+                {{ form.password }}
+                {% for error in form.password.errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
+
+                {{ form.password2.label }}
+                {{ form.password2 }}
+                {% for error in form.password2.errors %}
+                <p class="error">{{ error }}</p>
+                {% endfor %}
+
+                {{form.admin.label}}
+                {{form.admin(placeholder="Admin code. Please contact SPS for one if eligible.") }}
+
+                <div class="check-container">
+                    {{ form.terms }}
+                    <label for="terms">I agree to the <a href="terms">terms and conditions and have read the privacy
+                        policy</a></label>
+
+                </div>
+
+
+                <input type="submit" value="Register">
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

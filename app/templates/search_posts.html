@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<form action="{{url_for('search_posts')}}" method="post">
+    <div class="search-bar">
+        {{form.hidden_tag()}}
+        {{form.search(placeholder='Search for a post')}}
+        {{form.submit}}
+    </div>
+</form>
+
+<div class="centre">
+    <div class="results">
+
+            {% if posts != '' %}
+            {% if posts %}
+            <p>{{posts|length}} results found for {{form.search.data}}</p>
+            <table>
+                <tr>
+                    <th>Post</th>
+                    <th>Author</th>
+                    <th>Date</th>
+                </tr>
+                {% for post in posts %}
+                <tr>
+                    <td><a href="{{url_for('post', post_id=post.post_id)}}"><i
+                            class="fa-solid fa-circle-chevron-right"></i>  {{post.post_content|search_post}}</a></td>
+                    <td>{{post.author}}</td>
+                    <td>{{post.post_date|format_datetime}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            {% else %}
+            <p>No results found</p>
+            {% endif %}
+            {% endif %}
+    </div>
+</div>
+
+{% endblock %}

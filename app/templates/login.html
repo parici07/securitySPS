@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="centre">
+    <div class="create-form">
+        <h1>Login</h1>
+        <form action="/login" method="post">
+            {{ form.hidden_tag() }}
+
+            {{ form.username.label }}
+            {{ form.username }}
+            {% for error in form.username.errors %}
+            <p class="error"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>
+            {% endfor %}
+
+            {{ form.password.label }}
+            {{ form.password }}
+            {% for error in form.username.errors %}
+            <p class="error"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>
+            {% endfor %}
+
+            <div class="check-container">
+                {{ form.remember_me }}
+                {{ form.remember_me.label }}
+
+            </div>
+
+            <input type="submit" value="Login">
+        </form>
+    </div>
+</div>
+
+
+{% endblock %}

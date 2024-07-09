@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="centre">
+
+    <div class="game-container">
+        <div class="game-header">
+            <div class="third">
+                <img src="{{game['cover']['url']}}">
+                {% if is_favourite %}
+                <a href="{{url_for('favourite_game', game_id=game['id'])}}">Remove from Favourites</a>
+                {% else %}
+                <a href="{{url_for('favourite_game', game_id=game['id'])}}">Add to Favourites</a>
+                {% endif %}
+            </div>
+            <div class="two-thirds">
+                <h1>{{game['name']}}</h1>
+                <p>Audience Rating: {{game['rating']|ratingformat}}<br>
+                Release Date: {{game['release_dates'][0]['human']}}</p>
+
+
+                <div class="row">
+                    <div class="half">
+                        <p>Content Warnings</p>
+                        {% for content_description in game['age_ratings'] %}
+                        {% if content_description['content_descriptions'] %}
+                        {% for description in content_description['content_descriptions'] %}
+                        <li>{{description['description']}}</li>
+                        {% endfor %}
+                        {% else %}
+                        <li>No content warnings</li>
+                        {% endif %}
+                        {% endfor %}
+
+                    </div>
+
+                    <div class="half">
+                        <p>Genres</p>
+                        {% for genre in game['genres'] %}
+                        <li>{{genre['name']}}</li>
+                        {% endfor %}
+                        {% for theme in game['themes'] %}
+                        <li>{{theme['name']}}</li>
+                        {% endfor %}
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <div class="game-info">
+            <p>{{game['summary']}}</p>
+        </div>
+    </div>
+</div>
+
+
+
+
+{% endblock %}
