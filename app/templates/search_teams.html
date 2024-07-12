@@ -38,6 +38,22 @@
       {% else %}
         <p>No results found</p>
       {% endif %}
+    {% else %}
+        {% for team in user_teams %}
+          <div class="results">
+            <h2>My Teams</h2>
+            <table>
+                <tr>
+                    <th>Team</th>
+                    <th>Status</th>
+                </tr>
+                <tr>
+                    <td><a href="{{url_for('team', team_id=team.team_id)}}"><i class="fa-solid fa-circle-chevron-right"></i>  {{team.team_name}}</a></td>
+                    <td>{% if team.official %}Official{% else %}Unofficial{% endif %}</td>
+                </tr>
+            </table>
+          </div>
+        {% endfor %}
     {% endif %}
 
   </div>

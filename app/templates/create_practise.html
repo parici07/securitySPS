@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="centre">
+    <div class="create-form">
+        <form action="{{url_for('create_practise', team_id=team.team_id)}}" method="post">
+            {{form.hidden_tag()}}
+
+            {{form.practise_name.label}}
+            {{form.practise_name}}
+
+            {{form.practise_description.label}}
+            {{form.practise_description}}
+
+            {{form.practise_date.label}}
+            {{form.practise_date}}
+
+            {{form.practise_time.label}}
+            {{form.practise_time}}
+
+            {{form.submit}}
+        </form>
+    </div>
+</div>
+
+{% endblock %}

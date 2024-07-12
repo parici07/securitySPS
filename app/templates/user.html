@@ -15,8 +15,24 @@
                 </div>
                 <div class="three-quarter">
                     <p>{{user.username}}</p>
+                    {% if user.pronouns %}
                     <p>{{user.pronouns}}</p>
+                    {% endif %}
+                    {% if user.user_id == current_user.user_id %}
                     <a href="{{url_for('edit_profile')}}"><i class="fa-solid fa-pencil"></i>  Edit Profile</a>
+                        {% if is_ment %}
+                        <a href="{{url_for('mentor_application')}}"><i class="fa-solid fa-graduation-cap"></i> Revoke Mentor Status</a>
+                        {% else %}
+                            <a href="{{url_for('mentor_application')}}"><i class="fa-solid fa-graduation-cap"></i> Apply to
+                                be a Mentor</a>
+                        {% endif %}
+                    {% else %}
+                        {% if following %}
+                        <a href="{{url_for('follow', username=user.username)}}"><i class="fa-solid fa-user-minus"></i>  Unfollow</a>
+                        {% else %}
+                        <a href="{{url_for('follow', username=user.username)}}"><i class="fa-solid fa-user-plus"></i>  Follow</a>
+                        {% endif %}
+                    {% endif %}
                 </div>
             </div>
 

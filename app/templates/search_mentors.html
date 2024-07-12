@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<form action="{{url_for('search_mentors')}}" method="post">
+    {{ form.hidden_tag() }}
+    <div class="search-bar">
+        {{form.search(placeholder="Search for mentors")}}
+        {{form.submit}}
+    </div>
+</form>
+
+<div class="centre">
+    <div class="results">
+        {% if users != '' %}
+            {% if mentors %}
+                <p>{{mentors|length}} results found for {{form.search.data}}</p>
+               <table>
+                   <tr>
+                       <th>Username</th>
+                       <th>Apply</th>
+                   </tr>
+
+                   {% for mentor in mentors %}
+                       <tr>
+                           <td>{{mentor.username}}</td>
+                           <td><a href="{{url_for('select_mentor', mentor_id=mentor.user_id)}}">Select Mentor</a></td>
+                       </tr>
+                   {% endfor %}
+               </table>
+            {% else %}
+                <p>No results found</p>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

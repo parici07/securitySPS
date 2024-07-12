@@ -1,6 +1,37 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1> Home Page </h1>
+<div class="centre">
+    <h1>Welcome, {{current_user.username}}!</h1>
+    <div class="row">
+        <div class="middle half">
+            <div class="container">
+                {% if posts %}
+                <p>posts!</p>
+                {% else %}
+                <p>No recent posts</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="middle half">
+            <div class="container">
+                <h1>Upcoming Events</h1>
+                {% if events %}
+                {% for event in events %}
+                <div class="event">
+                    <p>{{event['name']}}</p>
+                    <p>{{event['type']}}</p>
+                    <p>{{event['date']|format_date}}</p>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p>No upcoming events</p>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

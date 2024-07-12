@@ -99,6 +99,7 @@ body{
     padding: 1em 0.5em;
 
 
+
 }
 
 .header a{
@@ -339,6 +340,8 @@ label{
 
 }
 
+
+
 .login-form{
     display: flex;
     flex-flow: column wrap;
@@ -381,6 +384,25 @@ label{
     color: white;
     font-family: 'Roboto';
     font-size: 1em;
+}
+
+.create-form button{
+    padding: 0.5em;
+    margin: 0.5em;
+    border: 2px solid white;
+    border-radius: 5px;
+    background-color: var(--bg);
+    color: white;
+    font-family: 'Roboto';
+    font-size: 1em;
+    transition: 0.5s;
+}
+
+.create-form button:hover{
+    background-color: rgba(255,255,255,0.2);
+    cursor: pointer;
+    transition: 0.5s;
+
 }
 
 .check-container{
@@ -469,7 +491,7 @@ label{
     background-color: var(--lightbg);
     box-shadow: 0 0 10px 0 rgba(0,0,0,0.5);
     border-radius: 0.5em;
-    padding: 1em;
+    padding: 0.5em;
     margin: 0.5em 0;
     font-family: 'Roboto';
     width: 90%;
@@ -510,8 +532,7 @@ label{
 }
 
 .event p{
-    padding: 0.5em 0;
-    margin: 0.5em 0;
+    padding: 0.5em;
 }
 
 
@@ -816,6 +837,14 @@ padding: 0.5em;
 
 }
 
+.middle.half{
+display: flex;
+flex-direction: column;
+width: 50%;
+padding: 0.5em;
+align-items: center;
+}
+
 .third img{
 width: 10em;
 height: 10em;
@@ -930,14 +959,22 @@ padding: 0 0.5em;
     display: flex;
     flex-flow: column wrap;
     justify-content: center;
-    width: 90%;
-    margin: 1em 0;
+    width: 95%;
+    margin: 0.5em 0;
     font-family: 'Roboto';
     background-color: var(--lightbg);
     padding: 1em;
     border-radius: 0.5em;
     box-shadow: 0 0 10px 0 rgba(0,0,0,0.5);
+    align-items: center;
 }
+
+.left.container{
+    justify-content: left;
+    align-items: normal;
+}
+
+
 
 .container h1{
     padding: 0.5em 0;

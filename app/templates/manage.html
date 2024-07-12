@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="centre">
+    <div class="row">
+        <div class="half">
+            <div class="left container">
+                <h1>Teams</h1>
+                {% for team in teams %}
+                    <a href="{{url_for('team', team_id=team.team_id)}}"><i class="fa-solid fa-user-group"></i>  {{team.team_name}}</a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="half">
+            <div class="left container">
+                <h1>Add Practises</h1>
+                {% for team in teams %}
+                <a href="{{url_for('create_practise', team_id=team.team_id)}}"><i class="fa-regular fa-square-plus"></i>  Add {{team.team_name}} practise</a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

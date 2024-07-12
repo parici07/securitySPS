@@ -156,6 +156,21 @@ class AddMatchForm(FlaskForm):
     match_time = TimeField('Match Time', format='%H:%M', validators=[DataRequired()])
     submit = SubmitField('Add Match')
 
+class SearchUsersForm(FlaskForm):
+    search = StringField('Search', validators=[DataRequired()])
+    submit = SubmitField('Search')
+
+class SearchMentorsForm(FlaskForm):
+    search = StringField('Search', validators=[DataRequired()])
+    submit = SubmitField('Search')
+
+class CreatePractiseForm(FlaskForm):
+    practise_name = StringField('Practise Name', validators=[DataRequired()])
+    practise_description = StringField('Practise Description', validators=[DataRequired()])
+    practise_date = DateField('Practise Date', format='%Y-%m-%d', validators=[DataRequired()])
+    practise_time = TimeField('Practise Time', format='%H:%M', validators=[DataRequired()])
+    submit = SubmitField('Create Practise')
+
 
 
 

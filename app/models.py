@@ -2,6 +2,8 @@ from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from datetime import datetime
+from passlib.hash import argon2
+
 
 
 
@@ -22,9 +24,18 @@ class User(UserMixin, db.Model):
     comments = db.relationship('Comments', back_populates='user')
     tournament_users = db.relationship('TournamentUsers', back_populates='user')
     match_users = db.relationship('MatchUsers', back_populates='user')
+    ment_applications = db.relationship('MentApplications', back_populates='user')
 
+
+    # many to one relationships
     tournament_admin = db.relationship('Tournaments', backref='user', foreign_keys='Tournaments.admin_id')
     tournament_winner = db.relationship('Tournaments', foreign_keys='Tournaments.winner_id')
+
+    following = db.relationship('Following', backref='user', foreign_keys='Following.user_id')
+    followed = db.relationship('Following', foreign_keys='Following.following_id')
+
+    mentor = db.relationship('Mentor', backref='mentor', foreign_keys='Mentor.mentor_id')
+    mentee = db.relationship('Mentor', foreign_keys='Mentor.mentee_id')
 
 
 
@@ -34,11 +45,12 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return f'<User {self.username}>'
     #pkdf2_sha256
-    def set_password(self, password):
+    '''def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        return check_password_hash(self.password_hash, password)'''
+
     #bcrypt
     '''def set_password(self, password):
         salt = bc.gensalt()
@@ -52,6 +64,24 @@ class User(UserMixin, db.Model):
 
     #argon2
 
+    def set_password(self, password):
+        self.password_hash = argon2.hash(password)
+
+    def check_password(self, password):
+        return argon2.verify(password, self.password_hash)
+
+
+class Following(db.Model):
+    follow_id = db.Column(db.Integer, primary_key=True, index=True, unique=True, nullable=False)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), name='follow_user_id', nullable=False)
+    following_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), name='follow_following_id', nullable=False)
+
+    def __repr__(self):
+        return '<Following {}>'.format(self.follow_id)
+
+    def get_id(self):
+        return str(self.follow_id)
 
 class FavouriteGames(db.Model):
     favourite_game_id = db.Column(db.Integer, primary_key=True)
@@ -74,6 +104,8 @@ class Teams(db.Model):
 
     team_admin = db.relationship('User', back_populates='team_admin')
     team_users = db.relationship('TeamUsers', back_populates='team')
+
+    practises = db.relationship('Practises', back_populates='team')
 
 
     def get_id(self):
@@ -204,6 +236,43 @@ class MatchUsers(db.Model):
     def __repr__(self):
         return f'<MatchUsers {self.match_user_id}>'
 
+class Mentor(db.Model):
+    ment_id = db.Column(db.Integer, primary_key=True)
+    mentor_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), name='mentor_id', nullable=False)
+    mentee_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), name='mentee_id', nullable=False)
+
+    def get_id(self):
+        return str(self.ment_id)
+
+    def __repr__(self):
+        return f'<Mentor {self.ment_id}>'
+
+class MentApplications(db.Model):
+    ment_appl_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
+
+    user = db.relationship('User', back_populates='ment_applications')
+
+    def get_id(self):
+        return str(self.ment_appl_id)
+
+    def __repr__(self):
+        return f'<MentApplications {self.ment_appl_id}>'
+
+class Practises(db.Model):
+    practise_id = db.Column(db.Integer, primary_key=True)
+    practise_name = db.Column(db.String(64), index=True, unique=True)
+    practise_description = db.Column(db.String(500))
+    practise_datetime = db.Column(db.DateTime, index=True)
+    team_id = db.Column(db.Integer, db.ForeignKey('teams.team_id'))
+
+    team = db.relationship('Teams', back_populates='practises')
+
+    def get_id(self):
+        return str(self.practise_id)
+
+    def __repr__(self):
+        return f'<Practises {self.practise_name}>'
 
 
 @login.user_loader

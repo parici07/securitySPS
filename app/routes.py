@@ -1,11 +1,12 @@
 import os
-
 from app import app, db
 from app.forms import (SearchGamesForm, LoginForm, RegistrationForm, CreateTeamForm,
                        TeamSearchForm, CreatePostForm, SearchPostsForm, CreateCommentForm,
-                       EditProfileForm, CreateTournamentForm, SearchTournamentsForm, AddMatchForm)
+                       EditProfileForm, CreateTournamentForm, SearchTournamentsForm, AddMatchForm,
+                       SearchUsersForm, SearchMentorsForm, CreatePractiseForm)
 from app.models import (User, FavouriteGames, Teams, TeamUsers, Posts, Likes, Comments,
-                        Tournaments, TournamentUsers, Matches, MatchUsers)
+                        Tournaments, TournamentUsers, Matches, MatchUsers, Following, Mentor,
+                        MentApplications, Practises)
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_login import current_user, login_user, logout_user, login_required
 from urllib.parse import urlsplit
@@ -30,7 +31,7 @@ def game_info(game_id):
         limit 10;
     '''
 
-    response = requests.post(url, headers=HEADERS, data=query)
+    response = requests.post(url, headers=HEADERS, data=query, verify=False)
     if response.status_code == 200:
         games = response.json()
         print(f"Number of games retrieved: {len(games)}")  # Debugging line
@@ -74,7 +75,7 @@ def game_search(game, genre, platform, year, mode, perspective):
         query = query.replace('limit 500;', where + '\n limit 500;')
 
     print(query)
-    response = requests.post(url, headers=HEADERS, data=query)
+    response = requests.post(url, headers=HEADERS, data=query, verify=False)
 
     if response.status_code == 200:
         games = response.json()
@@ -88,7 +89,85 @@ def game_search(game, genre, platform, year, mode, perspective):
 @app.route('/index')
 @login_required
 def index():
-    return render_template('index.html', title='Home')
+    # GET ALL EVENTS USER IS IN
+    today = date.today()
+    matchuser_inst = MatchUsers.query.filter_by(user_id=current_user.user_id).all()
+    matches = []
+    for match in matchuser_inst:
+        match = Matches.query.filter_by(match_id=match.match_id).first()
+        if match.match_datetime.date() >= today:
+            matches.append(match)
+
+
+    tournamentuser_inst = TournamentUsers.query.filter_by(user_id=current_user.user_id).all()
+    tournaments = []
+    for tournament in tournamentuser_inst:
+        tournament = Tournaments.query.filter_by(tournament_id=tournament.tournament_id).first()
+        if tournament.end_date >= today:
+            tournaments.append(tournament)
+
+    # get all teams
+    teamuser_inst = TeamUsers.query.filter_by(team_user_id=current_user.user_id).all()
+    teams = []
+    for team in teamuser_inst:
+        team = Teams.query.filter_by(team_id=team.team_id).first()
+        teams.append(team)
+
+    # get all team practises
+    practises = []
+    for team in teams:
+        practise_inst = Practises.query.filter_by(team_id=team.team_id).all()
+        for practise in practise_inst:
+            if practise.practise_datetime.date() >= today:
+                practises.append(practise)
+
+
+
+    events = []
+    for match in matches:
+        event = {}
+        event['type'] = 'Match'
+        event['name'] = f'Match {match.match_number}'
+        match_date = match.match_datetime
+        #convert datetime to date
+        match_date = match_date.date()
+        event['date'] = match_date
+        event['id'] = match.match_id
+        events.append(event)
+
+    for tournament in tournaments:
+        event = {}
+        event['type'] = 'Tournament Start'
+        event['name'] = tournament.tournament_name
+        event['date'] = tournament.start_date
+        event['id'] = tournament.tournament_id
+        events.append(event)
+
+        event = {}
+        event['type'] = 'Tournament End'
+        event['name'] = tournament.tournament_name
+        event['date'] = tournament.end_date
+        event['id'] = tournament.tournament_id
+        events.append(event)
+
+    for practise in practises:
+        event = {}
+        event['type'] = 'Practise'
+        event['name'] = practise.practise_name
+        event['date'] = practise.practise_datetime.date()
+        event['id'] = practise.practise_id
+        events.append(event)
+
+    events = sorted(events, key=lambda x: x['date'])
+    print(events)
+
+    # GET ALL POSTS
+    posts = []
+
+
+
+
+    return render_template('index.html', title='Home', events=events, posts=posts)
 
 ## LOGIN AND REGISTER ROUTES ##
 
@@ -140,6 +219,8 @@ def register():
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
 
+    following = Following.query.filter_by(user_id=current_user.user_id, following_id=user.user_id).first()
+
     # get favourite games
     favourite_games = FavouriteGames.query.filter_by(user_id=user.user_id).all()
     games = []
@@ -150,7 +231,10 @@ def user(username):
     # get posts
     posts = Posts.query.filter_by(user_id=user.user_id).all()
 
-    return render_template('user.html', title='Profile', user=user, games=games, posts=posts)
+    # mentor status
+    is_ment = MentApplications.query.filter_by(user_id=user.user_id).first()
+
+    return render_template('user.html', title='Profile', user=user, games=games, posts=posts, following=following, is_ment=is_ment)
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
@@ -178,6 +262,36 @@ def edit_profile():
         print(form.errors)
     return render_template('edit_profile.html', title='Edit Profile', form=form)
 
+@app.route('/search_users', methods=['GET', 'POST'])
+@login_required
+def search_users():
+    form = SearchUsersForm()
+    users = ''
+    if form.validate_on_submit():
+        users = User.query.filter_by(username=form.search.data).all()
+        return render_template('search_users.html', title="Search Users", form=form, users=users)
+    else:
+        print(form.errors)
+
+    return render_template('search_users.html', title="Search Users", form=form, users=users)
+
+@app.route('/follow/<username>', methods=['GET', 'POST'])
+@login_required
+def follow(username):
+    user = User.query.filter_by(username=username).first()
+
+    if user:
+        following = Following.query.filter_by(user_id=current_user.user_id, following_id=user.user_id).first()
+        if following:
+            db.session.delete(following)
+            db.session.commit()
+            flash(f'Unfollowed {username}')
+        else:
+            follow = Following(user_id=current_user.user_id, following_id=user.user_id)
+            db.session.add(follow)
+            db.session.commit()
+            flash(f'Followed {username}')
+    return redirect(url_for('user', username=username))
 
 
 
@@ -236,13 +350,20 @@ def favourite_game(game_id):
 def search_teams():
     form = TeamSearchForm()
 
+    # get user teams
+    userteam_inst = TeamUsers.query.filter_by(user_id=current_user.user_id).all()
+    user_teams = []
+    for team in userteam_inst:
+        team = Teams.query.filter_by(team_id=team.team_id).first()
+        user_teams.append(team)
+
     teams = ''
     if form.validate_on_submit():
         teams = Teams.query.filter_by(team_name=form.team_name.data).all()
         return render_template('search_teams.html', title='Search Teams', form=form, teams=teams)
     else:
         print(form.errors)
-    return render_template('search_teams.html', title='Search Teams', form=form, teams=teams)
+    return render_template('search_teams.html', title='Search Teams', form=form, teams=teams, user_teams=user_teams)
 
 @app.route('/create_team', methods=['GET', 'POST'])
 @login_required
@@ -272,7 +393,15 @@ def team(team_id):
     users = []
     for user in team_users:
         users.append(User.query.filter_by(user_id=user.user_id).first())
-    return render_template('team.html', title=team.team_name, team=team, users=users, in_team=in_team)
+
+    print(team.admin_id)
+    print(current_user.user_id)
+
+    if current_user.user_id == team.admin_id:
+        admin = True
+    else:
+        admin = False
+    return render_template('team.html', title=team.team_name, team=team, users=users, in_team=in_team, admin=admin)
 
 @app.route('/join_team/<team_id>')
 @login_required
@@ -290,6 +419,36 @@ def join_team(team_id):
         flash('Joined team')
 
     return redirect(url_for('team', team_id=team_id))
+
+@app.route('/create_practise/<team_id>', methods=['GET', 'POST'])
+@login_required
+def create_practise(team_id):
+    team = Teams.query.filter_by(team_id=team_id).first_or_404()
+
+    if current_user.user_id != team.admin_id:
+        return redirect(url_for('index'))
+
+    form = CreatePractiseForm()
+
+    if form.validate_on_submit():
+        practise_datetime = datetime.datetime.combine(form.practise_date.data, form.practise_time.data)
+
+        practise = Practises(practise_name=form.practise_name.data, practise_description=form.practise_description.data, practise_datetime=practise_datetime, team_id=team_id)
+        db.session.add(practise)
+        db.session.commit()
+        flash('Practise created')
+        return redirect(url_for('team', team_id=team_id))
+    else:
+        print(form.errors)
+    return render_template('create_practise.html', title='Create Practise', form=form, team=team)
+
+@app.route('/practise/<practise_id>', methods=['GET', 'POST'])
+@login_required
+def practise(practise_id):
+    practise = Practises.query.filter_by(practise_id=practise_id).first()
+
+    return render_template('practise.html', title=practise.practise_name, practise=practise)
+
 
 ## POST ROUTES ##
 
@@ -529,6 +688,76 @@ def add_match(tournament_id):
     else:
         print(form.errors)
     return render_template('add_match.html', title='Add Match', form=form, choices=choices, tournament_id=tournament_id)
+
+## MENTOR SYSTEM ##
+@app.route('/mentor_application', methods=['GET', 'POST'])
+@login_required
+def mentor_application():
+    is_mentor = MentApplications.query.filter_by(user_id=current_user.user_id).first()
+    if is_mentor:
+        flash('Withdrawn from mentor role.')
+        db.session.delete(is_mentor)
+        db.session.commit()
+    else:
+        mentor = MentApplications(user_id=current_user.user_id)
+        db.session.add(mentor)
+        db.session.commit()
+        flash('Users can now select you as a mentor.')
+    return redirect(url_for('user', username=current_user.username))
+
+@app.route('/search_mentors', methods=['GET', 'POST'])
+@login_required
+def search_mentors():
+    form = SearchMentorsForm()
+    users = ''
+
+    mentors = []
+
+    if form.validate_on_submit():
+        users = User.query.filter_by(username=form.search.data).all()
+        for user in users:
+            mentor = MentApplications.query.filter_by(user_id=user.user_id).first()
+            if mentor:
+                mentors.append(user)
+        return render_template('search_mentors.html', title='Search Mentors', form=form, users=users, mentors=mentors)
+    else:
+        print(form.errors)
+    return render_template('search_mentors.html', title='Search Mentors', users=users, form=form)
+
+@app.route('/select_mentor/<mentor_id>')
+@login_required
+def select_mentor(mentor_id):
+    # check if already mentoring someone
+    is_mentoring = Mentor.query.filter_by(mentor_id=mentor_id).first()
+    if is_mentoring:
+        flash('Mentor is already mentoring someone.')
+        return redirect(url_for('search_mentors'))
+
+    # check if same as current user
+    if int(mentor_id) == int(current_user.user_id):
+        flash('Cannot mentor self.')
+        return redirect(url_for('search_mentors'))
+
+    mentor = Mentor(mentor_id=mentor_id, mentee_id=current_user.user_id)
+    db.session.add(mentor)
+    db.session.commit()
+    flash('Mentor selected')
+    return redirect(url_for('search_mentors'))
+
+## MANAGEMENT DASHBOARD ##
+@app.route('/manage', methods=['GET', 'POST'])
+@login_required
+def manage():
+    if current_user.admin == False:
+        return redirect(url_for('index'))
+
+    # get all admin teams
+    teams = Teams.query.filter_by(admin_id=current_user.user_id).all()
+
+    return render_template('manage.html', title='Management Dashboard', teams=teams)
+
+
+
 
 
 

@@ -66,8 +66,16 @@
     <a href="{{url_for('search_teams')}}">Teams</a>
     <a href="{{url_for('search_posts')}}">Posts</a>
     <a href="{{url_for('search_tournaments')}}">Tournaments</a>
+    <a href="{{url_for('search_users')}}">Users</a>
+    <a href="{{url_for('search_mentors')}}">Mentors</a>
+    {% if current_user.admin %}
+    <a href="{{url_for('manage')}}">Manage</a>
+    {% endif %}
     <a href="{{url_for('user', username=current_user.username)}}">{{current_user.username}}</a>
     <a href="{{url_for('logout')}}">Logout</a>
+
+    <a href="javascript:showNavBar()"><i class="fa-solid fa-bars"></i></a>
+    <a href="javascript:window.history.back();"><i class="fa-solid fa-arrow-left"></i></a>
     {% else %}
         <a href="{{url_for('login')}}">Login</a>
         <a href="{{url_for('register')}}">Register</a>
@@ -77,12 +85,38 @@
 
 </div>
 <hr>
+
+<div id="navbar">
+    <div class="onerow">
+        <a id="closebtn" href="javascript:hideNavBar()"><i class="fa-solid fa-circle-xmark"></i></a>
+        <a href="{{ url_for('user', username=current_user.username) }}"><i class="fa-solid fa-user"></i>
+            {{current_user.username}}</a>
+
+    </div>
+
+    <a href="{{url_for('search_games')}}"><i class="fa-solid fa-gamepad"></i> Games</a>
+    <a href="{{url_for('search_teams')}}"><i class="fa-solid fa-user-group"></i> Teams</a>
+    <a href="{{url_for('search_posts')}}"><i class="fa-solid fa-newspaper"></i> Posts</a>
+    <a href="{{url_for('search_tournaments')}}"><i class="fa-solid fa-trophy"></i> Tournaments</a>
+    <a href="{{url_for('search_users')}}"><i class="fa-solid fa-users"></i> Users</a>
+    <a href="{{url_for('search_mentors')}}"><i class="fa-solid fa-user-tie"></i> Mentors</a>
+    {% if current_user.admin %}
+    <a href="{{url_for('manage')}}"><i class="fa-solid fa-cogs"></i> Manage</a>
+    {% endif %}
+    <a href="{{url_for('logout')}}"><i class="fa-solid fa-sign-out"></i> Logout</a>
+
+
+
+
+
+
+</div>
 <!-- flashed messages -->
 {% with messages = get_flashed_messages() %}
     {% if messages %}
         {% for message in messages %}
             <div class="flash">
-               <a href="javascript:closeFlash()">X</a>
+               <a href="javascript:closeFlash()"><i class="fa-regular fa-circle-xmark"></i></a>
                 {{ message }}
             </div>
         {% endfor %}

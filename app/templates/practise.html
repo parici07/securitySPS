@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content
+
+<div class="centre">
+    <div class="gen-container">
+        <h2>{{practise.practise_name}}</h2>
+        <p>{{practise.practise_description}}</p>
+        <p><i class="fa-solid fa-calendar-days"></i>  {{practise.practise_datetime|format_datetime}}</p>
+
+    </div>
+</div>
+
+{% endblock %}
