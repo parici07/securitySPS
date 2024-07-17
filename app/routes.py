@@ -6,7 +6,7 @@ from app.forms import (SearchGamesForm, LoginForm, RegistrationForm, CreateTeamF
                        SearchUsersForm, SearchMentorsForm, CreatePractiseForm, CreateNoteForm)
 from app.models import (User, FavouriteGames, Teams, TeamUsers, Posts, Likes, Comments,
                         Tournaments, TournamentUsers, Matches, MatchUsers, Following, Mentor,
-                        MentApplications, Practises, Stats)
+                        MentApplications, Practises, Stats, MentPractise)
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_login import current_user, login_user, logout_user, login_required
 from urllib.parse import urlsplit
@@ -14,6 +14,7 @@ import requests
 import datetime
 from datetime import date
 from werkzeug.utils import secure_filename
+
 
 CLIENT_ID = '85v6iy5ufik67v1ya6v7gqovuo7pur'
 ACCESS_TOKEN = ('jupv9nrc72mzidmshdplmuct50xigy')
@@ -837,6 +838,9 @@ def mentor_dashboard():
     for mentee in mentees:
         user = User.query.filter_by(user_id=mentee.mentee_id).first()
         users.append(user)
+
+    # get all mentor practises
+
 
     return render_template('mentor_dashboard.html', title='Mentor Dashboard', users=users)
 

@@ -25,6 +25,11 @@
 
             </div>
 
+            {{form.recaptcha}}
+            {% for error in form.recaptcha.errors %}
+            <p class="error"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>
+            {% endfor %}
+
             <input type="submit" value="Login">
         </form>
     </div>

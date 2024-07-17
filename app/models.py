@@ -25,6 +25,7 @@ class User(UserMixin, db.Model):
     tournament_users = db.relationship('TournamentUsers', back_populates='user')
     match_users = db.relationship('MatchUsers', back_populates='user')
     ment_applications = db.relationship('MentApplications', back_populates='user')
+    ment_practises = db.relationship('MentPractise', back_populates='user')
 
     # match winner
     matches_won = db.relationship('Matches', back_populates='match_winner', foreign_keys='Matches.winner_id')
@@ -262,6 +263,21 @@ class MentApplications(db.Model):
 
     def __repr__(self):
         return f'<MentApplications {self.ment_appl_id}>'
+
+class MentPractise(db.Model):
+    practise_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
+    practise_name = db.Column(db.String(64), index=True, unique=True)
+    practise_description = db.Column(db.String(500))
+    practise_datetime = db.Column(db.DateTime, index=True)
+
+    user = db.relationship('User', back_populates='ment_practises')
+
+    def get_id(self):
+        return str(self.practise_id)
+
+    def __repr__(self):
+        return f'<MentPractise {self.practise_id}>'
 
 class Practises(db.Model):
     practise_id = db.Column(db.Integer, primary_key=True)

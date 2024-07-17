@@ -79,6 +79,12 @@ body{
 
 }
 
+/* CAPTCHA */
+.rc-anchor-dark{
+    background: var(--bg) !important;
+    border: 2px solid white !important;
+}
+
 /* COLUMNS */
 
 .row{

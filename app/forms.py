@@ -1,11 +1,14 @@
-from flask_wtf import FlaskForm
+from flask_wtf import FlaskForm, RecaptchaField
 from flask_wtf.file import FileAllowed
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, \
     DateField, FileField, TimeField, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, optional
 from app.models import User
+
 from flask import request
 from werkzeug.utils import secure_filename
+
+
 
 GENRE_CHOICES = [('Any Genre', 'Any Genre'), ('Role-playing (RPG)', 'Role-playing (RPG)'),
                  ('Simulator', 'Simulator'), ('Sport', 'Sport'), ('Strategy', 'Strategy'),
@@ -51,6 +54,7 @@ class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
+    recaptcha = RecaptchaField()
     submit = SubmitField('Sign In')
 
 
@@ -67,6 +71,7 @@ class RegistrationForm(FlaskForm):
     password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
     admin = StringField('Admin Code')
     terms = BooleanField('I agree to the terms and conditions', validators=[DataRequired()])
+    recaptcha = RecaptchaField()
     submit = SubmitField('Register')
 
     def validate_username(self, username):

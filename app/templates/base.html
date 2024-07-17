@@ -23,10 +23,24 @@
 
 
 
+
+        document.addEventListener("click", function(event) {
+            console.log('detected click');
+            const anchor = event.target.closest('a');
+            if (anchor) {
+                console.log('clicked a');
+                const parent = anchor.parentElement;
+                if (parent.classList.contains('flash')) {
+                    console.log('clicked flash');
+                    parent.style.display = 'none';
+                }
+            }
+        });
+
         function closeFlash(){
-            var flash = document.getElementsByClassName("flash")[0];
-            flash.style.display = "none";
+        console.log("closeFlash");
         }
+
 
         function showNavBar(){
             if (window.innerWidth < 800){
@@ -115,8 +129,8 @@
 {% with messages = get_flashed_messages() %}
     {% if messages %}
         {% for message in messages %}
-            <div class="flash">
-               <a href="javascript:closeFlash()"><i class="fa-regular fa-circle-xmark"></i></a>
+            <div class="flash" id="#flash">
+               <a href="#"><i class="fa-regular fa-circle-xmark"></i></a>
                 {{ message }}
             </div>
         {% endfor %}
