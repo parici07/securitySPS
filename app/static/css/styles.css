@@ -153,12 +153,20 @@ body{
     letter-spacing: 2px;
     padding: 0 0.5em;
     position: relative;
-    transition: color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    /*transition: color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;*/
+    transition: 0.5s;
 }
 
-.header h1:hover{
+/*.header h1:hover{
     box-shadow: inset 300px 0 0 0 var(--accent);
     color: var(--bg);
+    cursor: pointer;
+}*/
+
+.header h1:hover{
+    text-shadow: 0 0 20px var(--accent);
+    color: var(--accent);
+    transition: 0.3s;
     cursor: pointer;
 }
 
@@ -597,6 +605,25 @@ label{
     font-family: 'Roboto';
 }
 
+.video-container{
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 1em 0;
+
+
+}
+
+.video-container iframe{
+    width: 50%;
+    height: 40vh;
+    border-radius: 0.5em;
+    box-shadow: 0 0 10px 0 rgba(0,0,0,0.5);
+    padding: 0.5em;
+}
+
 .user-header{
     display: flex;
     flex-flow: row wrap;
@@ -641,6 +668,13 @@ label{
     margin: 1em;
     padding: 0 0.5em;
     font-family: 'Roboto';
+}
+
+.stat-container{
+    border: 1px solid white;
+    border-radius: 0.5em;
+    padding: 0.5em;
+    margin: 0.5em;
 }
 
 .user-info details{
@@ -809,6 +843,13 @@ display: flex;
 flex-direction: row;
 
 width: 100%;
+}
+
+.stats{
+display: flex;
+flex-direction: row;
+width: 100%;
+justify-content: space-around;
 }
 
 .game-info{

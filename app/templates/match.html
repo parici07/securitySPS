@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="centre">
+    <div class="gen-container">
+        <h1>Match {{match.match_number}} of {{tournament.tournament_name}}</h1>
+        <p>{{users[0].username}} vs {{users[1].username}}</p>
+        <p><i class="fas fa-calendar-alt"></i>  {{match.match_datetime|format_datetime}}</p>
+        {% if winner %}
+        <p>Winner: {{winner.username}}</p>
+        {% else %}
+            <p>Winner: TBD</p>
+        {% endif %}
+
+        {% if admin %}
+        {% if not winner %}
+        <div class="stat-container">
+            <h2>Select Winner</h2>
+            <div class="stats">
+
+                <a href="{{url_for('add_match_winner', match_id=match.match_id, winner_id=users[0].user_id)}}"><i
+                        class="fas fa-trophy"></i>
+                    {{users[0].username}}</a>
+                <a href="{{url_for('add_match_winner', match_id=match.match_id, winner_id=users[1].user_id)}}"><i
+                        class="fas fa-trophy"></i>
+                    {{users[1].username}}</a>
+            </div>
+        </div>
+
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

@@ -6,17 +6,26 @@
     <div class="gen-container">
         <h1>{{tournament.tournament_name}}</h1>
         <p>{{tournament.tournament_description}}</p>
-        {% if admin %}
+        {% if admin and not winner %}
         <a href="{{url_for('add_match', tournament_id=tournament.tournament_id)}}"><i
                 class="fa-solid fa-plus"></i>  Add Match</a>
         {% endif %}
         <p><i class="fa-solid fa-calendar-days"></i>  {{tournament.start_date|format_date}} - {{tournament.end_date|format_date}}</p>
 
         <p><i class="fa-solid fa-user-group"></i>  {{users|length}} / {{tournament.participants}}</p>
+        {% if winner %}
+        <p><i class="fa-solid fa-trophy"></i>  Winner: <a href="{{url_for('user', username=winner.username)}}">{{winner.username}}</a></p>
+        {% else %}
+        <p><i class="fa-solid fa-trophy"></i>  Winner: TBD</p>
+        {% endif %}
+
 
         {% if full %}
         <p>Tournament is full!</p>
+        {% elif winner %}
+        <p>Tournament is over!</p>
         {% else %}
+
             {% if in_tournament %}
             <a href="{{url_for('join_tournament', tournament_id=tournament.tournament_id)}}"><i
                     class="fa-solid fa-user-minus"></i>  Leave</a>
@@ -52,7 +61,8 @@
 
                 {% for match in matches %}
                 <tr>
-                    <td>Match {{match.match_number}}</td>
+                    <td><a href="{{url_for('match', match_id=match.match_id)}}"><i
+                            class="fa-solid fa-circle-chevron-right"></i>  Match {{match.match_number}}</a></td>
                     <td>{{match.match_datetime|format_datetime}}</td>
                 </tr>
                 {% endfor %}

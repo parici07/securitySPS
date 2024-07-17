@@ -15,7 +15,7 @@
 
             {{ form.password.label }}
             {{ form.password }}
-            {% for error in form.username.errors %}
+            {% for error in form.password.errors %}
             <p class="error"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>
             {% endfor %}
 

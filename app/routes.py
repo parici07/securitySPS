@@ -3,10 +3,10 @@ from app import app, db
 from app.forms import (SearchGamesForm, LoginForm, RegistrationForm, CreateTeamForm,
                        TeamSearchForm, CreatePostForm, SearchPostsForm, CreateCommentForm,
                        EditProfileForm, CreateTournamentForm, SearchTournamentsForm, AddMatchForm,
-                       SearchUsersForm, SearchMentorsForm, CreatePractiseForm)
+                       SearchUsersForm, SearchMentorsForm, CreatePractiseForm, CreateNoteForm)
 from app.models import (User, FavouriteGames, Teams, TeamUsers, Posts, Likes, Comments,
                         Tournaments, TournamentUsers, Matches, MatchUsers, Following, Mentor,
-                        MentApplications, Practises)
+                        MentApplications, Practises, Stats)
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_login import current_user, login_user, logout_user, login_required
 from urllib.parse import urlsplit
@@ -26,7 +26,8 @@ HEADERS = {
 def game_info(game_id):
     url = 'https://api.igdb.com/v4/games'
     query = f'''
-    fields name, cover.url, age_ratings.content_descriptions.description, release_dates.human, genres.name, rating, summary, url, themes.name;
+    fields name, cover.url, age_ratings.content_descriptions.description, release_dates.human, 
+    genres.name, rating, summary, url, themes.name, videos.video_id;
     where id = {game_id};
         limit 10;
     '''
@@ -234,7 +235,31 @@ def user(username):
     # mentor status
     is_ment = MentApplications.query.filter_by(user_id=user.user_id).first()
 
-    return render_template('user.html', title='Profile', user=user, games=games, posts=posts, following=following, is_ment=is_ment)
+    # get all game stats
+    stats = Stats.query.filter_by(user_id=user.user_id).all()
+
+    # retrieve titles from game_ids
+    game_titles = []
+    for stat in stats:
+        game_titles.append(game_info(stat.game_id)[0]['name'])
+
+    stat_list = []
+    for i in range(len(stats)):
+        stat_list.append([game_titles[i], stats[i].wins, stats[i].losses, stats[i].draws, stats[i].notes])
+
+    print(stat_list)
+
+    # show matches won
+    matches = MatchUsers.query.filter_by(user_id=user.user_id).all()
+    matches_won = 0
+    for match in matches:
+        match = Matches.query.filter_by(match_id=match.match_id).first()
+        if match.winner_id == user.user_id:
+            matches_won += 1
+
+    return render_template('user.html', title='Profile', user=user, games=games,
+                           posts=posts, following=following, is_ment=is_ment, stat_list=stat_list,
+                           matches_won=matches_won)
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
@@ -321,10 +346,7 @@ def game(game_id):
     cover_url = game['cover']['url']
     cover_url = cover_url.replace('t_thumb', 't_cover_big')
     game['cover']['url'] = cover_url
-    print(game)
-    print(game['name'])
-    print(game['release_dates'][0]['human'])
-    print(game['age_ratings'][0])
+    print(game['videos'])
     return render_template('game.html', title=game['name'], game=game, is_favourite=is_favourite)
 
 @app.route('/favourite_game/<game_id>')
@@ -576,12 +598,15 @@ def tournament(tournament_id):
 
     matches = Matches.query.filter_by(tournament_id=tournament_id).all()
 
-
+    if tournament.winner_id:
+        winner = User.query.filter_by(user_id=tournament.winner_id).first()
+    else:
+        winner = None
 
 
     return render_template('tournament.html', title=tournament.tournament_name,
                            tournament=tournament, users=users, in_tournament=in_tournament,
-                           full=full, admin=admin, matches=matches)
+                           full=full, admin=admin, matches=matches, winner=winner)
 
 @app.route('/join_tournament/<tournament_id>', methods=['GET', 'POST'])
 @login_required
@@ -689,6 +714,61 @@ def add_match(tournament_id):
         print(form.errors)
     return render_template('add_match.html', title='Add Match', form=form, choices=choices, tournament_id=tournament_id)
 
+@app.route('/add_match_winner/<match_id>/<winner_id>', methods=['GET', 'POST'])
+@login_required
+def add_match_winner(match_id, winner_id):
+    match = Matches.query.filter_by(match_id=match_id).first()
+    match_users = MatchUsers.query.filter_by(match_id=match_id).all()
+
+    tournament = Tournaments.query.filter_by(tournament_id=match.tournament_id).first()
+
+    users = []
+    for user in match_users:
+        users.append(User.query.filter_by(user_id=user.user_id).first())
+
+    for user in users:
+        if user.user_id == int(winner_id):
+            winner = user.username
+        else:
+            loser = user.username
+            # delete user from tournament
+            tournament_user = TournamentUsers.query.filter_by(user_id=user.user_id, tournament_id=tournament.tournament_id).first()
+            db.session.delete(tournament_user)
+            db.session.commit()
+
+    match.winner_id = winner_id
+    db.session.commit()
+    flash(f'{winner} has won the match against {loser}')
+
+    # check users left in tournament
+    tournament_users = TournamentUsers.query.filter_by(tournament_id=tournament.tournament_id).count()
+    if tournament_users == 1:
+        tournament.winner_id = winner_id
+        db.session.commit()
+
+    return redirect(url_for('tournament', tournament_id=tournament.tournament_id))
+
+@app.route('/match/<match_id>', methods=['GET', 'POST'])
+@login_required
+def match(match_id):
+    match = Matches.query.filter_by(match_id=match_id).first()
+    match_users = MatchUsers.query.filter_by(match_id=match_id).all()
+    tournament = Tournaments.query.filter_by(tournament_id=match.tournament_id).first()
+    if match.winner_id:
+        winner = User.query.filter_by(user_id=match.winner_id).first()
+    else:
+        winner = None
+    users = []
+    for user in match_users:
+        users.append(User.query.filter_by(user_id=user.user_id).first())
+
+    admin = User.query.filter_by(user_id=tournament.admin_id).first()
+    if current_user.user_id == admin.user_id:
+        admin = True
+    else:
+        admin = False
+    return render_template('match.html', title='Match', users=users, match=match, tournament=tournament, admin=admin, winner=winner)
+
 ## MENTOR SYSTEM ##
 @app.route('/mentor_application', methods=['GET', 'POST'])
 @login_required
@@ -744,6 +824,22 @@ def select_mentor(mentor_id):
     flash('Mentor selected')
     return redirect(url_for('search_mentors'))
 
+@app.route('/mentor_dashboard', methods=['GET', 'POST'])
+@login_required
+def mentor_dashboard():
+    is_mentor = MentApplications.query.filter_by(user_id=current_user.user_id).first()
+    if not is_mentor:
+        return redirect(url_for('index'))
+
+    # get all mentees
+    mentees = Mentor.query.filter_by(mentor_id=current_user.user_id).all()
+    users = []
+    for mentee in mentees:
+        user = User.query.filter_by(user_id=mentee.mentee_id).first()
+        users.append(user)
+
+    return render_template('mentor_dashboard.html', title='Mentor Dashboard', users=users)
+
 ## MANAGEMENT DASHBOARD ##
 @app.route('/manage', methods=['GET', 'POST'])
 @login_required
@@ -755,6 +851,76 @@ def manage():
     teams = Teams.query.filter_by(admin_id=current_user.user_id).all()
 
     return render_template('manage.html', title='Management Dashboard', teams=teams)
+
+## STATS FUNCTIONS ##
+
+@app.route('/win/<game_id>')
+@login_required
+def win(game_id):
+    # check if game is in stats
+    stat = Stats.query.filter_by(user_id=current_user.user_id, game_id=game_id).first()
+    if stat:
+        stat.wins += 1
+        db.session.commit()
+    else:
+        stat = Stats(user_id=current_user.user_id, game_id=game_id, wins=1, losses=0, draws=0)
+        db.session.add(stat)
+        db.session.commit()
+    return redirect(url_for('game', game_id=game_id))
+
+@app.route('/loss/<game_id>')
+@login_required
+def loss(game_id):
+    # check if game is in stats
+    stat = Stats.query.filter_by(user_id=current_user.user_id, game_id=game_id).first()
+    if stat:
+        stat.losses += 1
+        db.session.commit()
+    else:
+        stat = Stats(user_id=current_user.user_id, game_id=game_id, wins=0, losses=1, draws=0)
+        db.session.add(stat)
+        db.session.commit()
+    return redirect(url_for('game', game_id=game_id))
+
+@app.route('/draw/<game_id>')
+@login_required
+def draw(game_id):
+    # check if game is in stats
+    stat = Stats.query.filter_by(user_id=current_user.user_id, game_id=game_id).first()
+    if stat:
+        stat.draws += 1
+        db.session.commit()
+    else:
+        stat = Stats(user_id=current_user.user_id, game_id=game_id, wins=0, losses=0, draws=1)
+        db.session.add(stat)
+        db.session.commit()
+    return redirect(url_for('game', game_id=game_id))
+
+@app.route('/create_note/<game_id>', methods=['GET', 'POST'])
+@login_required
+def create_note(game_id):
+    # check if note already added
+    stats = Stats.query.filter_by(user_id=current_user.user_id, game_id=game_id).first()
+    note = stats.notes
+    game = game_info(game_id)[0]
+    form = CreateNoteForm()
+    if note:
+        flash('You already have a note for this game. Submitting this will replace it.')
+
+    if form.validate_on_submit():
+        stats.notes = form.note.data
+        db.session.commit()
+        return redirect(url_for('game', game_id=game_id))
+    else:
+        print(form.errors)
+        return render_template('create_note.html', title='Add Note', form=form, game=game)
+
+    return render_template('create_note.html', title='Add Note', form=form, game=game)
+
+## ERROR HANDLING ##
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
 
 
 

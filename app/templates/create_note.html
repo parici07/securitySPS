@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="centre">
+    <div class="create-form">
+        <form action="{{url_for('create_note', game_id=game['id'])}}" method="post">
+            {{form.hidden_tag()}}
+
+            {{form.note(placeholder="Write a note about your performance in the game here")}}
+            {{form.submit}}
+        </form>
+    </div>
+</div>
+
+{% endblock %}

@@ -53,6 +53,13 @@ class LoginForm(FlaskForm):
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
 
+
+    def validate_password(self, password):
+        user = User.query.filter_by(username=self.username.data).first()
+        if user is not None:
+            if not user.check_password(password.data):
+                raise ValidationError('Your username or password is incorrect')
+
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -170,6 +177,10 @@ class CreatePractiseForm(FlaskForm):
     practise_date = DateField('Practise Date', format='%Y-%m-%d', validators=[DataRequired()])
     practise_time = TimeField('Practise Time', format='%H:%M', validators=[DataRequired()])
     submit = SubmitField('Create Practise')
+
+class CreateNoteForm(FlaskForm):
+    note = TextAreaField('Note', validators=[DataRequired()])
+    submit = SubmitField('Add Note')
 
 
 

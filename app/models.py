@@ -26,6 +26,8 @@ class User(UserMixin, db.Model):
     match_users = db.relationship('MatchUsers', back_populates='user')
     ment_applications = db.relationship('MentApplications', back_populates='user')
 
+    # match winner
+    matches_won = db.relationship('Matches', back_populates='match_winner', foreign_keys='Matches.winner_id')
 
     # many to one relationships
     tournament_admin = db.relationship('Tournaments', backref='user', foreign_keys='Tournaments.admin_id')
@@ -212,9 +214,11 @@ class Matches(db.Model):
     match_number = db.Column(db.Integer)
     match_datetime = db.Column(db.DateTime, index=True)
     tournament_id = db.Column(db.Integer, db.ForeignKey('tournaments.tournament_id'))
+    winner_id = db.Column(db.Integer, db.ForeignKey('user.user_id', name='winner_id'))
 
     tournament = db.relationship('Tournaments', back_populates='matches')
     match_users = db.relationship('MatchUsers', back_populates='match')
+    match_winner = db.relationship('User', foreign_keys=[winner_id], back_populates='matches_won')
 
     def get_id(self):
         return str(self.match_id)
@@ -273,6 +277,21 @@ class Practises(db.Model):
 
     def __repr__(self):
         return f'<Practises {self.practise_name}>'
+
+class Stats(db.Model):
+    stat_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
+    game_id = db.Column(db.Integer, index=True, nullable=False)
+    wins = db.Column(db.Integer)
+    losses = db.Column(db.Integer)
+    draws = db.Column(db.Integer)
+    notes = db.Column(db.String(500))
+
+    def get_id(self):
+        return str(self.stat_id)
+
+    def __repr__(self):
+        return f'<Stats {self.stat_id}>'
 
 
 @login.user_loader
