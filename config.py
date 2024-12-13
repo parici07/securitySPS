@@ -9,8 +9,8 @@ class Config(object):
                               'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    RECAPTCHA_PUBLIC_KEY = '6Lf2-hEqAAAAAMYrAQi2sYe38TK9ZI6-kreK3cEw'
-    RECAPTCHA_PRIVATE_KEY = '6Lf2-hEqAAAAAMH_H6upI7jkXpxposp2AWLt1KWs'
+    RECAPTCHA_PUBLIC_KEY = 'redacted'
+    RECAPTCHA_PRIVATE_KEY = 'redacted'
 
     RECAPTCHA_DATA_ATTRS = {'theme': 'dark'}
 
